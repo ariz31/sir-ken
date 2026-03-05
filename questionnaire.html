@@ -1,0 +1,452 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <base target="_top">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BIM Effectiveness Questionnaire</title>
+    <style>
+        /* --- CSS Variables and Global Setup --- */
+        :root {
+            --primary-color: #0d47a1;
+            --primary-light: #1565c0;
+            --primary-bg: #e3f2fd;
+            --text-color: #212529;
+            --border-color: #dee2e6;
+            --light-gray-bg: #f8f9fa;
+            --white-bg: #ffffff;
+            --danger-color: #d32f2f;
+        }
+
+        html { font-size: clamp(15px, 1rem + 0.2vw, 17px); }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background-color: #f4f4f9;
+            color: var(--text-color);
+            line-height: 1.6;
+            margin: 0;
+            padding: 1rem;
+        }
+
+        /* --- Modal (Pop-up) Styles --- */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            padding: 1rem;
+            box-sizing: border-box;
+        }
+
+        .modal-content {
+            background: var(--white-bg);
+            padding: clamp(1.5rem, 5vw, 2.5rem);
+            border-radius: 12px;
+            max-width: 800px;
+            max-height: 90vh;
+            overflow-y: auto;
+            text-align: left;
+            box-shadow: 0 5px 25px rgba(0,0,0,0.2);
+        }
+
+        .modal-content h2, .modal-content h3 {
+            border-bottom: 1px solid #eee;
+            padding-bottom: 0.5em;
+            margin-top: 1.5rem;
+            margin-bottom: 1rem;
+            color: var(--primary-color);
+        }
+        
+        .modal-content p, .modal-content li {
+             margin-bottom: 1em;
+        }
+
+        #proceedButton {
+             display: block;
+             width: auto;
+             margin: 2.5rem auto 0 auto;
+             padding: 0.9rem 2.2rem;
+        }
+
+        .container {
+            max-width: 850px;
+            margin: 0 auto;
+            background: var(--white-bg);
+            padding: clamp(1.5rem, 5vw, 3rem);
+            border-radius: 12px;
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
+            display: none; /* Initially hidden */
+        }
+
+        h1, h2, h3 {
+            line-height: 1.3;
+            border-bottom: 2px solid #e0e0e0;
+            padding-bottom: 0.6em;
+            margin: 2.5rem 0 1.5rem 0;
+        }
+
+        h1 {
+            color: var(--primary-color);
+            text-align: center;
+            font-size: clamp(1.8rem, 1.5rem + 2vw, 2.5rem);
+        }
+        h2 {
+            color: var(--primary-color);
+            font-size: clamp(1.5rem, 1.3rem + 1.5vw, 2rem);
+        }
+        h3 {
+            color: var(--primary-light);
+            border-bottom: 1px solid #eee;
+            font-size: clamp(1.2rem, 1.1rem + 1vw, 1.5rem);
+        }
+
+        .question-group {
+            margin-bottom: 1.5rem;
+            padding: 1.5rem;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            background-color: var(--light-gray-bg);
+        }
+
+        label.question-title {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            color: #343a40;
+        }
+
+        .required { color: var(--danger-color); margin-left: 0.25rem; }
+
+        input[type="text"], input[type="number"], select, textarea {
+            width: 100%;
+            padding: 0.8rem 1rem;
+            margin-top: 0.5rem;
+            font-size: 1rem;
+            border: 1px solid #ced4da;
+            border-radius: 6px;
+            box-sizing: border-box;
+            transition: border-color 0.3s, box-shadow 0.3s;
+        }
+        input:focus, select:focus, textarea:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 4px rgba(13, 71, 161, 0.1);
+            outline: none;
+        }
+        
+        button {
+            display: block;
+            width: 100%;
+            padding: 1rem;
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background-color 0.3s, transform 0.2s;
+            margin-top: 2rem;
+        }
+        button:hover:not(:disabled) { background-color: var(--primary-light); transform: translateY(-2px); }
+        button:disabled { background-color: #adb5bd; cursor: not-allowed; }
+
+        /* Secondary Button Style (for Back button) */
+        .btn-secondary {
+            background-color: #6c757d;
+        }
+        .btn-secondary:hover {
+            background-color: #5a6268;
+        }
+
+        .likert-scale { display: flex; flex-direction: column; align-items: flex-start; padding-top: 0.5rem; }
+        .likert-scale label {
+            font-weight: 500;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            width: 100%;
+            padding: 0.8rem 0.5rem;
+            border-radius: 5px;
+            transition: background-color 0.2s;
+        }
+        .likert-scale label:hover { background-color: #e9ecef; }
+        .likert-scale input[type="radio"] { margin-right: 1rem; flex-shrink: 0; transform: scale(1.4); }
+
+        .checkbox-group label {
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            margin-bottom: 0.8rem;
+            padding: 0.5rem;
+        }
+        input[type="checkbox"] { margin-right: 1rem; flex-shrink: 0; transform: scale(1.4); }
+
+        #submissionStatus, .thank-you { margin-top: 1.5rem; padding: 1rem; border-radius: 5px; text-align: center; font-weight: 500; }
+        .thank-you { background-color: var(--primary-bg); border-left: 5px solid var(--primary-color); }
+        .success { background-color: #d1e7dd; color: #0f5132; }
+        .error { background-color: #f8d7da; color: #842029; }
+        
+        /* --- MULTI-STEP FORM STYLES --- */
+        .form-step {
+            display: none; /* Hidden by default */
+        }
+        .form-step.active {
+            display: block; /* Show active step */
+            animation: fadeIn 0.5s ease-in-out;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @media (min-width: 768px) {
+            body { padding: 2rem; }
+            .container { padding: 3rem 4rem; }
+            .likert-scale {
+                flex-direction: row;
+                justify-content: space-between;
+                align-items: center;
+            }
+            .likert-scale label {
+                flex-direction: column-reverse;
+                text-align: center;
+                width: auto;
+            }
+            .likert-scale input[type="radio"] {
+                margin-right: 0;
+                margin-bottom: 0.5rem;
+            }
+            .button-row {
+                display: flex;
+                gap: 1rem;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div id="introModal" class="modal-overlay">
+        <div class="modal-content">
+            <h2>Dear Participant,</h2>
+            <p>This research aims to assess the effectiveness of Building Information Modeling (BIM) in enhancing communication and collaboration within construction projects in the Philippines. Your professional insights are crucial for understanding BIM's real-world advantages, challenges, and the strategies that lead to success.</p>
+            <p>The questionnaire will take approximately <strong>5–10 minutes</strong> to complete, and all responses will remain confidential. Participation is <strong>voluntary</strong>, and you may withdraw at any time.</p>
+            
+            <h3>Data Privacy Statement</h3>
+            <p>In compliance with the Data Privacy Act of 2012 (Republic Act No. 10173), we assure you that all information collected in this survey will be treated with the utmost confidentiality and used solely for academic research purposes.</p>
+            <ul>
+                <li>No personally identifiable information will be collected, stored, or disclosed.</li>
+                <li>All data will be anonymized, securely stored, and accessible only to the authorized research team.</li>
+                <li>Your participation is <strong>entirely voluntary</strong>, and you may choose to withdraw at any point without any penalty.</li>
+                <li>The responses will be used strictly for analysis and publication of research results in a manner that does not reveal your identity.</li>
+            </ul>
+            <p>By proceeding with this survey, you confirm that you have understood this statement and consent to the use of your responses for the stated purpose.</p>
+            <p><strong>Thank you for your time and valuable input!</strong></p>
+            
+            <button id="proceedButton">Proceed to the Survey</button>
+        </div>
+    </div>
+
+    <div class="container">
+        <h1>Assessing BIM's Impact on Communication and Collaboration in the Philippine Construction Industry</h1>
+
+        <form id="bimForm">
+            
+            <div id="step1" class="form-step active">
+                
+                <h2>Part 1: Professional Background</h2>
+                <div class="question-group">
+                    <label class="question-title" for="Role">What is your current role/profession?<span class="required">*</span></label>
+                    <select id="Role" name="Role" required>
+                        <option value="" disabled selected>Select your role...</option>
+                        <option value="Architect">Architect</option><option value="Engineer">Engineer</option><option value="Contractor">Contractor</option><option value="Project Manager">Project Manager</option><option value="Client/Owner/Developer">Client/Owner/Developer</option><option value="BIM Manager/Coordinator">BIM Manager/Coordinator</option><option value="Other">Other</option>
+                    </select>
+                </div>
+                <div class="question-group">
+                    <label class="question-title" for="YearsOfExperience">Years of experience in the construction industry?<span class="required">*</span></label>
+                    <input type="number" id="YearsOfExperience" name="YearsOfExperience" placeholder="e.g., 10" required min="0">
+                </div>
+                <div class="question-group">
+                    <label class="question-title" for="FamiliarityWithBIM">How familiar are you with BIM?<span class="required">*</span></label>
+                    <select id="FamiliarityWithBIM" name="FamiliarityWithBIM" required>
+                        <option value="" disabled selected>Select your familiarity level...</option>
+                        <option value="Very familiar">Very familiar</option><option value="Somewhat familiar">Somewhat familiar</option><option value="Not at all familiar">Not at all familiar</option>
+                    </select>
+                </div>
+                <div class="question-group">
+                    <label class="question-title">Do you or your organization currently use BIM in projects?<span class="required">*</span></label>
+                    <select id="CurrentBIMUsage" name="CurrentBIMUsage" onchange="toggleBimReason()" required>
+                        <option value="" disabled selected>Select an option...</option>
+                        <option value="Currently use BIM">We currently use BIM</option><option value="Planning to adopt">We are planning to adopt BIM soon</option><option value="Not using BIM">We are not using BIM and have no plans</option>
+                    </select>
+                </div>
+                <div class="question-group" id="noBimReasonSection" style="display:none;">
+                    <label class="question-title" for="ReasonForNoBIM">If no plans to adopt BIM, could you please specify why?</label>
+                    <textarea id="ReasonForNoBIM" name="ReasonForNoBIM" rows="4"></textarea>
+                </div>
+
+                <div id="part2-container"></div>
+
+                <button type="button" onclick="nextStep()">Next</button>
+            </div>
+
+
+            <div id="step2" class="form-step">
+                
+                <button type="button" class="btn-secondary" onclick="prevStep()">Back</button>
+
+                <div id="part34-container"></div>
+                
+                <h2>Part 5: Demographic Profile</h2>
+                <p>This final section is for statistical purposes only. <strong>Your responses will remain confidential.</strong></p>
+                <div class="question-group">
+                     <label class="question-title">Which types of projects have you been involved in? (Select all that apply)<span class="required">*</span></label>
+                     <div class="checkbox-group">
+                          <label><input type="checkbox" name="ProjectsInvolved" value="Residential"> Residential</label>
+                          <label><input type="checkbox" name="ProjectsInvolved" value="Commercial"> Commercial</label>
+                          <label><input type="checkbox" name="ProjectsInvolved" value="Infrastructure"> Infrastructure</label>
+                          <label><input type="checkbox" name="ProjectsInvolved" value="Industrial"> Industrial</label>
+                     </div>
+                </div>
+                <div class="question-group">
+                    <label class="question-title" for="OrganizationType">What is the type of your primary organization?<span class="required">*</span></label>
+                    <select id="OrganizationType" name="OrganizationType" required>
+                        <option value="" disabled selected>Select organization type...</option>
+                        <option value="Architecture/Engineering Design Firm">Architecture/Engineering Design Firm</option><option value="Construction Company/Contractor">Construction Company/Contractor</option><option value="Consulting/Project Management Firm">Consulting/Project Management Firm</option><option value="Client/Owner/Developer">Client/Owner/Developer</option><option value="Government/Regulatory Agency">Government/Regulatory Agency</option><option value="Other">Other</option>
+                    </select>
+                </div>
+                <div class="question-group">
+                    <label class="question-title" for="Age">What is your age?<span class="required">*</span></label>
+                    <input type="number" id="Age" name="Age" placeholder="e.g., 35" required min="18">
+                </div>
+                <div class="question-group">
+                    <label class="question-title" for="Gender">What is your gender?<span class="required">*</span></label>
+                    <select id="Gender" name="Gender" required>
+                        <option value="" disabled selected>Select your gender...</option>
+                        <option value="Male">Male</option><option value="Female">Female</option><option value="Prefer not to say">Prefer not to say</option><option value="Other">Other</option>
+                    </select>
+                </div>
+                <div class="question-group">
+                    <label class="question-title" for="Location">What is your current geographic location?<span class="required">*</span></label>
+                    <input type="text" id="Location" name="Location" placeholder="e.g., Baguio City, Benguet" required>
+                </div>
+
+                <div class="button-row">
+                    <button type="submit" id="submitButton">Submit Responses</button>
+                </div>
+            </div>
+
+            <div id="submissionStatus" style="display:none;"></div>
+        </form>
+        
+        <div id="thankYouMessage" class="thank-you" style="display:none;">
+          <h2>Thank You!</h2>
+          <p>Your participation is greatly appreciated. Your responses will help assess the effectiveness of BIM in the construction industry.</p>
+        </div>
+    </div>
+
+    <script>
+        const questionData = {
+          "Part 2: Perceived Advantages of BIM":{scale:["Strongly Disagree","Disagree","Neutral","Agree","Strongly Agree"],sections:{"2A. Communication & Information Sharing":[{id:"adv_centralizesInfo",text:"BIM centralizes project information, making it easier for all stakeholders to access the latest design data."},{id:"adv_improvesClarity3D",text:"BIM improves communication clarity by providing 3D visualizations instead of solely 2D drawings."},{id:"adv_reducesMisunderstandings",text:"BIM reduces misunderstandings because everyone references the same up-to-date model."},{id:"adv_facilitatesFeedback",text:"BIM’s real-time data updates facilitate more immediate feedback and faster decision-making."},{id:"adv_enhancesIntegration",text:"Integration with other software (e.g., cost estimating) enhances the flow of information."}],"2B. Collaboration & Coordination":[{id:"adv_multidisciplinaryCollab",text:"BIM enhances multidisciplinary collaboration by enabling simultaneous work on a shared model."},{id:"adv_streamlinesCoordination",text:"BIM streamlines coordination of design details across different trades, reducing duplication of efforts."},{id:"adv_integratedDelivery",text:"BIM fosters a more integrated project delivery environment, improving stakeholder relationships."},{id:"adv_remoteCollaboration",text:"With BIM, teams can collaborate remotely more effectively (e.g., using cloud platforms)."},{id:"adv_promotesTransparency",text:"BIM’s common data environment (CDE) promotes transparency and trust among all parties."}],"2C. Productivity & Efficiency Gains":[{id:"adv_speedsUpPlanning",text:"BIM speeds up project planning and documentation, reducing time on repetitive tasks."},{id:"adv_learningCurveJustified",text:"The learning curve for BIM is justified by the long-term productivity gains it delivers."},{id:"adv_automatesTakeoff",text:"BIM automates tasks like quantity takeoff, enabling faster and more accurate estimates."},{id:"adv_parametricModeling",text:"BIM’s parametric modeling allows quick updates to design changes, reducing manual rework."},{id:"adv_boostsOverallEfficiency",text:"Overall, BIM boosts efficiency by integrating multiple project processes into one platform."}],"2D. Risk & Conflict Mitigation":[{id:"adv_clashDetection",text:"BIM’s clash detection tools help identify design conflicts early, preventing costly rework later."},{id:"adv_reducesOnSiteErrors",text:"A well-managed BIM process reduces on-site errors, enhancing overall quality control."},{id:"adv_minimizesAmbiguities",text:"BIM minimizes ambiguities that can lead to disputes among project stakeholders."},{id:"adv_visualizesComplexSystems",text:"Early visualization of complex systems (MEP, structural) helps mitigate design integration risks."},{id:"adv_improvesConstructability",text:"BIM improves constructability reviews, allowing teams to address potential issues before construction."}],"2E. Cost & Time Savings":[{id:"adv_lowersCosts",text:"BIM can significantly lower project costs by reducing waste, rework, and scheduling delays."},{id:"adv_optimizesResourceUsage",text:"BIM’s simulation tools (e.g., energy modeling) help optimize resource usage and control expenses."},{id:"adv_cutsDownDelays",text:"Early detection of errors in BIM cuts down on project delays, leading to faster completion."},{id:"adv_longTermSavings",text:"Investing in BIM pays off through long-term savings, even if initial costs appear high."},{id:"adv_smootherWorkflows",text:"BIM-driven projects often benefit from smoother workflows, resulting in timely project handovers."}]}},
+          "Part 3: Challenges and Barriers in Implementing BIM":{scale:["Strongly Disagree","Disagree","Neutral","Agree","Strongly Agree"],sections:{
+            
+            "3A. Communication & Information Sharing": [
+                {id:"chal_dataExchange", text:"Difficulty in exchanging information because project teams use different software versions or data standards."},
+                {id:"chal_disorganizedInfo", text:"Project information within the BIM model is poorly organized, making it difficult to find relevant data."},
+                {id:"chal_outdatedInfo", text:"Delays in updating the central BIM model lead to team members working with outdated information."},
+                {id:"chal_misinterpretation", text:"Team members misinterpret information in the model due to a lack of clear communication protocols."}
+            ],
+
+            "3B. Collaboration & Coordination":[{id:"chal_siloedWorkflows",text:"Siloed workflows within organizations make it difficult to collaborate on a shared model."},{id:"chal_ineffectiveCoordination",text:"Stakeholders reverting to 2D drawings or separate platforms shows ineffective coordination."},{id:"chal_limitedInteroperability",text:"Limited interoperability between different BIM software used by partners is a challenge."},{id:"chal_lackOfTrust",text:"Lack of trust or buy-in from certain stakeholders hinders full collaboration in a BIM environment."}],"3C. Productivity & Efficiency Gains":[{id:"chal_steepLearningCurve",text:"A steep learning curve for BIM software results in temporary drops in efficiency."},{id:"chal_underutilizationOfFeatures",text:"Teams only using basic modeling and missing advanced features limits productivity."},{id:"chal_inadequateHardware",text:"Inadequate hardware or IT infrastructure causes slow model processing."},{id:"chal_insufficientTraining",text:"Insufficient training programs lead to inefficient use of BIM tools and workflows."}],"3D. Risk & Conflict Mitigation":[{id:"chal_limitedClashKnowledge",text:"Limited clash detection knowledge among team members causes conflicts to be missed."},{id:"chal_poorRoleDefinitions",text:"Poor role definitions in the BIM process lead to confusion about who addresses identified risks."},{id:"chal_incompleteModels",text:"Incomplete or outdated BIM models fail to capture real-time changes."},{id:"chal_noStandardizedProtocols",text:"No standardized risk management protocols are integrated with BIM workflows."}],"3E. Cost & Time Savings":[{id:"chal_highInvestment",text:"The high upfront investment in software, hardware, and training is a major barrier."},{id:"chal_difficultyProvingROI",text:"Difficulty proving ROI of BIM to top management leads to a lack of budget support."},{id:"chal_extendedTimelines",text:"Project timelines are often extended during initial BIM implementation phases."},{id:"chal_misalignmentOfCosts",text:"Misalignment of cost responsibilities (e.g., who bears software costs) creates issues."}]}},
+          "Part 4: Effectiveness of Strategies to Overcome Challenges":{scale:["Very Ineffective","Ineffective","Neutral","Effective","Very Effective"],sections:{"4A. Communication & Information Sharing":[{id:"strat_establishCDE",text:"Establishing a common data environment (CDE) with clear protocols."},{id:"strat_adoptIFC",text:"Adopting industry-standard formats (e.g., IFC) to improve interoperability."}],"4B. Collaboration & Coordination":[{id:"strat_implementIPD",text:"Implementing integrated project delivery (IPD) or collaborative contracts."},{id:"strat_appointBimCoordinator",text:"Appointing a dedicated BIM coordinator/champion for projects."}],"4C. Productivity & Efficiency Gains":[{id:"strat_ongoingTraining",text:"Providing ongoing BIM training (beginner to advanced) for staff."},{id:"strat_investInHardware",text:"Investing in high-performance hardware and IT infrastructure."}],"4D. Risk & Conflict Mitigation":[{id:"strat_mandatoryClashDetection",text:"Implementing clash detection as a mandatory step at each design milestone."},{id:"strat_developBEP",text:"Developing a BIM Execution Plan (BEP) outlining roles and responsibilities."}],"4E. Cost & Time Savings":[{id:"strat_conductROIStudies",text:"Conducting ROI studies or pilot projects to demonstrate tangible benefits."},{id:"strat_integrateCostTools",text:"Integrating cost-estimation tools within BIM for accurate budgeting."}]}}
+        };
+
+        function renderQuestions() {
+            const container2 = document.getElementById("part2-container");
+            const container34 = document.getElementById("part34-container");
+            
+            let htmlPart2 = "";
+            let htmlPart34 = "";
+
+            for(const p in questionData){
+                let sectionHtml = `<h2>${p}</h2>`;
+                const t=questionData[p];
+                for(const e in t.sections){
+                    sectionHtml += `<h3>${e}</h3>`;
+                    const n=t.sections[e];
+                    n.forEach(q=>{
+                        sectionHtml += `<div class="question-group"><label class="question-title">${q.text}<span class="required">*</span></label><div class="likert-scale">`;
+                        t.scale.forEach((l,i)=>{
+                            const v=i+1;
+                            sectionHtml += `<label><input type="radio" name="${q.id}" value="${v}" required>${l}</label>`
+                        });
+                        sectionHtml += `</div></div>`
+                    });
+                }
+
+                // Split logic: If it is Part 2, add to first container, otherwise add to second
+                if (p.startsWith("Part 2")) {
+                    htmlPart2 += sectionHtml;
+                } else {
+                    htmlPart34 += sectionHtml;
+                }
+            }
+            container2.innerHTML = htmlPart2;
+            container34.innerHTML = htmlPart34;
+        }
+
+        function toggleBimReason(){const e=document.getElementById("CurrentBIMUsage"),t=document.getElementById("noBimReasonSection"),n=document.getElementById("ReasonForNoBIM");"Not using BIM"===e.value?(t.style.display="block",n.required=!0):(t.style.display="none",n.required=!1)}
+        
+        // --- Navigation Functions ---
+        function nextStep() {
+            const step1 = document.getElementById("step1");
+            // Check validity of inputs in step 1 before moving
+            const inputs = step1.querySelectorAll("input, select, textarea");
+            let valid = true;
+            for (const input of inputs) {
+                if (!input.checkValidity()) {
+                    input.reportValidity(); // Shows the browser's native "Please fill out this field" tooltip
+                    valid = false;
+                    return; // Stop at the first invalid field
+                }
+            }
+
+            if (valid) {
+                document.getElementById("step1").classList.remove("active");
+                document.getElementById("step2").classList.add("active");
+                window.scrollTo(0, 0); // Scroll to top
+            }
+        }
+
+        function prevStep() {
+            document.getElementById("step2").classList.remove("active");
+            document.getElementById("step1").classList.add("active");
+            window.scrollTo(0, 0);
+        }
+
+        document.getElementById("bimForm").addEventListener("submit",function(e){e.preventDefault();const t=document.querySelectorAll('input[name="ProjectsInvolved"]:checked');if(0===t.length)return void alert("Please select at least one project type in Part 5.");const n=document.getElementById("submitButton");n.disabled=!0,n.textContent="Submitting...";const o=new FormData(this),a={};for(let[c,l]of o.entries())a.hasOwnProperty(c)?(Array.isArray(a[c])||(a[c]=[a[c]]),a[c].push(l)):a[c]=l;const i=document.getElementById("submissionStatus");google.script.run.withSuccessHandler(function(r){if(r.startsWith("Success"))document.getElementById("bimForm").style.display="none",document.getElementById("thankYouMessage").style.display="block";else throw new Error(r)}).withFailureHandler(function(r){i.textContent="An error occurred. Please try again. "+r.message,i.className="error",i.style.display="block",n.disabled=!1,n.textContent="Submit Responses"}).processForm(a)});
+        
+        // --- New script to handle modal ---
+        document.addEventListener("DOMContentLoaded", () => {
+            const introModal = document.getElementById('introModal');
+            const surveyContainer = document.querySelector('.container');
+            const proceedButton = document.getElementById('proceedButton');
+
+            // Add event listener to the proceed button
+            proceedButton.addEventListener('click', () => {
+                introModal.style.display = 'none'; // Hide the modal
+                surveyContainer.style.display = 'block'; // Show the survey
+            });
+
+            // Now, render the questions into the (initially hidden) form
+            renderQuestions();
+        });
+    </script>
+</body>
+</html>
