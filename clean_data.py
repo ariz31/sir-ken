@@ -54,6 +54,17 @@ def clean_data():
     if num_invalid_likert > 0:
         print(f"Removed {num_invalid_likert} rows with invalid Likert scale values.")
 
+    # 5. Remove low quality responses (straight-liners)
+    # Calculate the standard deviation across all 55 Likert scale items.
+    # If the standard deviation is 0, the respondent provided the exact same
+    # answer for every single question (e.g. all 3s, all 4s, all 5s). This is
+    # indicative of low effort and not actually reading the questions.
+    likert_std = df[all_likert].std(axis=1)
+    straight_liners_mask = likert_std == 0
+    num_straight_liners = straight_liners_mask.sum()
+    df = df[~straight_liners_mask]
+    print(f"Removed {num_straight_liners} low quality straight-liner responses (std == 0).")
+
     # Save the cleaned dataset
     df.to_csv(output_file, index=False)
     print(f"Cleaned dataset saved to {output_file}. New shape: {df.shape}")
