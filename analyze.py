@@ -91,7 +91,7 @@ def analyze_section(df, name, cols):
 
 def main():
     # Load data
-    file_path = "Questionnaire - Sheet1 (4).csv"
+    file_path = "cleaned_dataset.csv"
     try:
         df = pd.read_csv(file_path)
     except Exception as e:
