@@ -145,7 +145,7 @@ def calculate_stats(df, questions, scale, mapping):
     return results
 
 def main():
-    df = pd.read_csv("Questionnaire - Sheet1 (4).csv")
+    df = pd.read_csv("cleaned_dataset.csv")
     questions, scales, mapping = extract_meta()
 
     pdf = PDFReport()

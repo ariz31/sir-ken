@@ -3,7 +3,7 @@ import pingouin as pg
 from factor_analyzer.factor_analyzer import calculate_kmo, calculate_bartlett_sphericity
 
 # Load data
-df = pd.read_csv("Questionnaire - Sheet1 (4).csv")
+df = pd.read_csv("cleaned_dataset.csv")
 
 # Extract columns
 adv_cols = [c for c in df.columns if c.startswith('adv_')]
