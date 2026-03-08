@@ -3,6 +3,7 @@ import pingouin as pg
 from factor_analyzer.factor_analyzer import calculate_kmo, calculate_bartlett_sphericity
 from fpdf import FPDF
 import warnings
+import os
 
 # Suppress specific warnings from factor_analyzer
 warnings.filterwarnings("ignore", category=UserWarning, module="factor_analyzer.utils")
@@ -91,7 +92,8 @@ def analyze_section(df, name, cols):
 
 def main():
     # Load data
-    file_path = "cleaned_dataset.csv"
+    base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    file_path = os.path.join(base_dir, "data", "cleaned_dataset.csv")
     try:
         df = pd.read_csv(file_path)
     except Exception as e:
@@ -146,7 +148,7 @@ def main():
     pdf.chapter_body(conclusion_text)
 
     # Save PDF
-    output_filename = "Validity_and_Reliability_Report.pdf"
+    output_filename = os.path.join(base_dir, "reports", "Validity_and_Reliability_Report.pdf")
     pdf.output(output_filename)
     print(f"Successfully generated {output_filename}")
 

@@ -5,6 +5,7 @@ from fpdf import FPDF
 import warnings
 import json
 import re
+import os
 
 # Suppress warnings
 warnings.filterwarnings("ignore", category=UserWarning, module="factor_analyzer.utils")
@@ -70,7 +71,9 @@ class PDFReport(FPDF):
         self.ln(5)
 
 def extract_meta():
-    with open("questionnaire.html", "r", encoding='utf-8') as f:
+    base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    file_path = os.path.join(base_dir, "data", "questionnaire.html")
+    with open(file_path, "r", encoding='utf-8') as f:
         html_content = f.read()
 
     questions = {}
@@ -145,7 +148,9 @@ def calculate_stats(df, questions, scale, mapping):
     return results
 
 def main():
-    df = pd.read_csv("cleaned_dataset.csv")
+    base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    file_path = os.path.join(base_dir, "data", "cleaned_dataset.csv")
+    df = pd.read_csv(file_path)
     questions, scales, mapping = extract_meta()
 
     pdf = PDFReport()
@@ -256,7 +261,8 @@ def main():
 
         pdf.ln(5)
 
-    pdf.output("Statistical_Analysis_Report.pdf")
+    output_filename = os.path.join(base_dir, "reports", "Statistical_Analysis_Report.pdf")
+    pdf.output(output_filename)
     print("Statistical_Analysis_Report.pdf generated successfully.")
 
 if __name__ == "__main__":
