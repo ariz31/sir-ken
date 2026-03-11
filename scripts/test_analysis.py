@@ -1,9 +1,12 @@
 import pandas as pd
 import pingouin as pg
 from factor_analyzer.factor_analyzer import calculate_kmo, calculate_bartlett_sphericity
+import os
 
 # Load data
-df = pd.read_csv("cleaned_dataset.csv")
+base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+file_path = os.path.join(base_dir, "data", "cleaned_dataset.csv")
+df = pd.read_csv(file_path)
 
 # Extract columns
 adv_cols = [c for c in df.columns if c.startswith('adv_')]

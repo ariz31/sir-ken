@@ -9,9 +9,12 @@ def clean_location(loc):
     loc = re.sub(r'\s+', ' ', loc)
     return loc
 
+import os
+
 def clean_data():
-    input_file = "Questionnaire - Sheet1 (4).csv"
-    output_file = "cleaned_dataset.csv"
+    base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    input_file = os.path.join(base_dir, "data", "Questionnaire - Sheet1 (4).csv")
+    output_file = os.path.join(base_dir, "data", "cleaned_dataset.csv")
 
     # Read original data
     df = pd.read_csv(input_file)
